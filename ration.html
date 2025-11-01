@@ -246,10 +246,7 @@
             margin-left: auto;
         }
 
-        .export-btn:hover {
-            background: #219653;
-            transform: translateY(-2px);
-        }
+    
 
         mark {
             background: yellow;
@@ -328,7 +325,7 @@
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search by ration card number, name, Aadhaar, mobile...">
                 <button id="searchBtn" onclick="searchData()">Search</button>
-                <button class="export-btn" onclick="exportToCSV()">📥 Export Results</button>
+        
             </div>
 
             <div class="search-options">
@@ -561,7 +558,7 @@
             
             // Filter based on search type
             currentResults = csvData.filter(item => {
-                if (currentSearchType === 'all') {
+                if (currentSearchType === 'name') {
                     // Search all fields
                     return Object.values(item).some(value => 
                         value.toString().toLowerCase().includes(query)
@@ -679,36 +676,7 @@
             cardDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // Export to CSV function
-        function exportToCSV() {
-            if (currentResults.length === 0) {
-                alert('No results to export!');
-                return;
-            }
 
-            let csvContent = headers.join(',') + '\n';
-            
-            currentResults.forEach(row => {
-                const rowData = headers.map(header => {
-                    let value = row[header] || '';
-                    if (value.includes(',')) {
-                        value = `"${value}"`;
-                    }
-                    return value;
-                });
-                csvContent += rowData.join(',') + '\n';
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'ration_card_search_results.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
 
         // Search on Enter key
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
@@ -717,24 +685,7 @@
             }
         });
 
-        // Real-time search
-        let searchTimeout;
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                if (this.value.length >= 3) {
-                    searchData();
-                } else if (this.value.length === 0) {
-                    const resultsContainer = document.getElementById('resultsContainer');
-                    const resultsInfo = document.getElementById('resultsInfo');
-                    resultsInfo.innerHTML = 'Enter search term to find ration cards';
-                    resultsContainer.innerHTML = '<div class="no-results"><h3>🔍 Search for ration cards</h3><p>Use the search box above to find ration card details</p></div>';
-                    
-                    // Hide card details
-                    document.getElementById('cardDetails').classList.remove('show');
-                }
-            }, 300);
-        });
+    
     </script>
 </body>
 </html>
