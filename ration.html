@@ -414,7 +414,7 @@
                 document.getElementById('totalRecords').textContent = 'Loading data...';
                 document.getElementById('searchStatus').textContent = 'Loading...';
                 
-                const response = await fetch('/ration.csv');
+                const response = await fetch('/ration1.csv');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -717,24 +717,7 @@
             }
         });
 
-        // Real-time search
-        let searchTimeout;
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                if (this.value.length >= 3) {
-                    searchData();
-                } else if (this.value.length === 0) {
-                    const resultsContainer = document.getElementById('resultsContainer');
-                    const resultsInfo = document.getElementById('resultsInfo');
-                    resultsInfo.innerHTML = 'Enter search term to find ration cards';
-                    resultsContainer.innerHTML = '<div class="no-results"><h3>🔍 Search for ration cards</h3><p>Use the search box above to find ration card details</p></div>';
-                    
-                    // Hide card details
-                    document.getElementById('cardDetails').classList.remove('show');
-                }
-            }, 300);
-        });
+        
     </script>
 </body>
 </html>
