@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle RC Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #e74c3c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        #rcInput {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        #rcInput:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        #searchBtn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2c3e50 0%, #e74c3c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #searchBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        #searchBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .proxy-selector {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .proxy-selector label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .proxy-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .api-info {
+            background: #e8f4fd;
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .api-info code {
+            background: #2c3e50;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .results-section {
+            padding: 0 20px 30px 20px;
+        }
+
+        .results-info {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 1.1rem;
+            padding: 0 10px;
+        }
+
+        .vehicle-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #e74c3c;
+        }
+
+        .vehicle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .vehicle-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            letter-spacing: 1px;
+        }
+
+        .vehicle-status {
+            background: #27ae60;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #e74c3c;
+            display: none;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #e74c3c;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .copy-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .search-section {
+                padding: 20px;
+            }
+            
+            #rcInput {
+                min-width: 100%;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .results-section {
+                padding: 0 10px 20px 10px;
+            }
+            
+            .stat-card {
+                min-width: 100%;
+            }
+            
+            .vehicle-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .vehicle-card {
+                padding: 20px 15px;
+            }
+            
+            .vehicle-number {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Vehicle RC Search</h1>
+            <p>Search vehicle registration details instantly</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="rcInput" placeholder="Enter Vehicle Number (e.g., WB50B0913)" maxlength="10">
+                <button id="searchBtn" onclick="searchVehicle()">Search Vehicle</button>
+            </div>
+
+            <div class="proxy-selector">
+                <label for="proxySelect">Select Connection Method:</label>
+                <select id="proxySelect">
+                    <option value="cors1">CORS Proxy 1 (api.allorigins.win)</option>
+                    <option value="direct">Direct API (Fastest)</option>
+                    <option value="cors2">CORS Proxy 2 (corsproxy.io)</option>
+                    <option value="cors3">CORS Proxy 3 (proxy.cors.sh)</option>
+                </select>
+            </div>
+
+           
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>🔍 Search Status</h3>
+                    <div id="searchStatus">Ready</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📊 Proxy Method</h3>
+                    <div id="proxyMethod">Direct</div>
+                </div>
+                <div class="stat-card">
+                    <h3>⚡ Response Time</h3>
+                    <div id="responseTime">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-info" id="resultsInfo">Enter a vehicle number to search</div>
+            
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Searching vehicle database...</p>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+
+            <div id="resultsContainer">
+                <div class="no-results">
+                    <h3>🔍 Search Vehicle</h3>
+                    <p>Enter a vehicle number above to get RC details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Proxy configurations
+        const proxyConfigs = {
+            'direct': '',
+            'cors1': 'https://api.allorigins.win/raw?url=',
+            'cors2': 'https://corsproxy.io/?',
+            'cors3': 'https://proxy.cors.sh/'
+        };
+
+        const API_BASE_URL = 'https://vahan.vishalboss.sbs/fetch_rc.php';
+
+        // Search vehicle
+        async function searchVehicle() {
+            const rcInput = document.getElementById('rcInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('errorMessage');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+            const searchStatus = document.getElementById('searchStatus');
+            const proxyMethod = document.getElementById('proxyMethod');
+            const responseTime = document.getElementById('responseTime');
+            const proxySelect = document.getElementById('proxySelect');
+
+            const vehicleNumber = rcInput.value.trim().toUpperCase();
+
+            // Validation
+            if (!vehicleNumber) {
+                showError('Please enter a vehicle number');
+                return;
+            }
+
+            if (vehicleNumber.length < 5) {
+                showError('Please enter a valid vehicle number');
+                return;
+            }
+
+            // Reset UI
+            errorDiv.style.display = 'none';
+            resultsContainer.innerHTML = '';
+            searchBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+            searchStatus.textContent = 'Searching...';
+
+            const selectedProxy = proxySelect.value;
+            const proxyUrl = proxyConfigs[selectedProxy];
+            proxyMethod.textContent = selectedProxy.charAt(0).toUpperCase() + selectedProxy.slice(1);
+
+            const startTime = performance.now();
+
+            try {
+                const apiUrl = `${API_BASE_URL}?rc=${encodeURIComponent(vehicleNumber)}`;
+                let finalUrl;
+
+                if (selectedProxy === 'direct') {
+                    finalUrl = apiUrl;
+                } else {
+                    finalUrl = proxyUrl + encodeURIComponent(apiUrl);
+                }
+
+                console.log('Fetching from:', finalUrl);
+
+                const headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                };
+
+                const response = await fetch(finalUrl, { 
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const endTime = performance.now();
+                const searchTime = (endTime - startTime).toFixed(2);
+
+                responseTime.textContent = `${searchTime}ms`;
+                loadingDiv.style.display = 'none';
+                searchBtn.disabled = false;
+                searchStatus.textContent = 'Ready';
+
+                if (data && Object.keys(data).length > 0) {
+                    displayResults(data, vehicleNumber);
+                } else {
+                    showNoResults(vehicleNumber);
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+                loadingDiv.style.display = 'none';
+                searchBtn.disabled = false;
+                searchStatus.textContent = 'Error';
+                
+                // Try alternative proxy if direct fails
+                if (selectedProxy === 'direct') {
+                    showError(`Direct connection failed. Trying CORS proxy...<br><br>
+                    <button onclick="retryWithProxy()" style="padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Retry with CORS Proxy
+                    </button>`);
+                } else {
+                    showError(`Failed to fetch data: ${error.message}<br><br>
+                    <button onclick="switchProxy()" style="padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Try Different Proxy
+                    </button>`);
+                }
+            }
+        }
+
+        // Retry with CORS proxy
+        function retryWithProxy() {
+            document.getElementById('proxySelect').value = 'cors1';
+            document.getElementById('errorMessage').style.display = 'none';
+            searchVehicle();
+        }
+
+        // Switch to different proxy
+        function switchProxy() {
+            const currentProxy = document.getElementById('proxySelect').value;
+            const proxies = ['direct', 'cors1', 'cors2', 'cors3'];
+            const currentIndex = proxies.indexOf(currentProxy);
+            const nextIndex = (currentIndex + 1) % proxies.length;
+            
+            document.getElementById('proxySelect').value = proxies[nextIndex];
+            document.getElementById('errorMessage').style.display = 'none';
+            searchVehicle();
+        }
+
+        // Display results
+        function displayResults(data, vehicleNumber) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+
+            resultsInfo.innerHTML = `Found RC details for vehicle: <strong>${vehicleNumber}</strong>`;
+
+            let html = `
+                <div class="vehicle-card fade-in">
+                    <div class="vehicle-header">
+                        <div class="vehicle-number">${vehicleNumber}</div>
+                        <div class="vehicle-status">✅ Active</div>
+                    </div>
+                    
+                    <div class="details-grid">
+            `;
+
+            // Display all fields from API response
+            Object.entries(data).forEach(([key, value]) => {
+                if (value && value !== 'N/A' && value !== 'null') {
+                    const label = formatLabel(key);
+                    html += `
+                        <div class="detail-item">
+                            <div class="detail-label">${label}</div>
+                            <div class="detail-value">${value}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            html += `
+                    </div>
+                    
+                    <button class="copy-btn" onclick="copyVehicleInfo()">
+                        📋 Copy Vehicle Details
+                    </button>
+                </div>
+            `;
+
+            resultsContainer.innerHTML = html;
+        }
+
+        // Format field labels
+        function formatLabel(key) {
+            return key
+                .replace(/_/g, ' ')
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, str => str.toUpperCase())
+                .trim();
+        }
+
+        // Show no results message
+        function showNoResults(vehicleNumber) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+            
+            resultsInfo.innerHTML = `No RC details found for vehicle: <strong>${vehicleNumber}</strong>`;
+            
+            resultsContainer.innerHTML = `
+                <div class="no-results">
+                    <h3>❌ No Records Found</h3>
+                    <p>The vehicle number <strong>${vehicleNumber}</strong> is not found in the database.</p>
+                    <p>Please check the number and try again.</p>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Copy vehicle information
+        function copyVehicleInfo() {
+            const vehicleCard = document.querySelector('.vehicle-card');
+            const vehicleNumber = vehicleCard.querySelector('.vehicle-number').textContent;
+            const details = vehicleCard.querySelectorAll('.detail-item');
+            
+            let info = `Vehicle Number: ${vehicleNumber}\n\n`;
+            
+            details.forEach(detail => {
+                const label = detail.querySelector('.detail-label').textContent;
+                const value = detail.querySelector('.detail-value').textContent;
+                info += `${label}: ${value}\n`;
+            });
+            
+            navigator.clipboard.writeText(info.trim()).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#27ae60';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // Auto-format vehicle input
+        document.getElementById('rcInput').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+        });
+
+        // Search on Enter key
+        document.getElementById('rcInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchVehicle();
+            }
+        });
+
+        // Clear results when input changes
+        document.getElementById('rcInput').addEventListener('input', function(e) {
+            if (this.value.length === 0) {
+                document.getElementById('resultsContainer').innerHTML = `
+                    <div class="no-results">
+                        <h3>🔍 Search Vehicle</h3>
+                        <p>Enter a vehicle number above to get RC details</p>
+                    </div>
+                `;
+                document.getElementById('resultsInfo').textContent = 'Enter a vehicle number to search';
+                document.getElementById('responseTime').textContent = '-';
+                document.getElementById('errorMessage').style.display = 'none';
+            }
+        });
+
+        // Test with sample data
+        function testWithSample() {
+            document.getElementById('rcInput').value = 'WB50B0913';
+            searchVehicle();
+        }
+
+        // Uncomment below line to auto-test on load
+        // window.addEventListener('load', testWithSample);
+    </script>
+</body>
+</html>
