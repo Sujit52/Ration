@@ -233,7 +233,7 @@ async function search() {
     if(currentInput==='mobile' && mobile.length===10 && /^\d{10}$/.test(mobile)) {
         url = `https://n2d.vercel.app/api?key=freeApi&number=${mobile}`;
     } else if(currentInput==='aadhaar' && aadhaar.length===12 && /^\d{12}$/.test(aadhaar)) {
-        url = `https://dark-op.dev-is.xyz/?key=wasdark&aadhaar=${aadhaar}`;
+        url = `https://n2d.vercel.app/api?key=freeApi&aadhaar_number=${aadhaar}`;
     } else {
         output.innerHTML = '<div class="error-card">Please enter a valid number</div>';
         return;
