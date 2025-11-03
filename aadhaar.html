@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Number & Aadhaar Lookup</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .toggle-btn {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            background: #f5f7fa;
+            border-radius: 12px;
+            padding: 5px;
+        }
+        
+        .toggle-btn button {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 10px;
+            margin: 0 3px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .toggle-btn button.active {
+            background: #007bff;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+        
+        .field {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .field input {
+            width: 100%;
+            padding: 16px 50px;
+            border-radius: 12px;
+            border: 2px solid #e1e5eb;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .field input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            outline: none;
+        }
+        
+        .field i {
+            position: absolute;
+            top: 50%;
+            left: 18px;
+            transform: translateY(-50%);
+            color: #007bff;
+            font-size: 18px;
+        }
+        
+        button.search-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        button.search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        }
+        
+        button.search-btn:active {
+            transform: translateY(0);
+        }
+        
+        #output {
+            margin-top: 25px;
+        }
+        
+        .result-card, .error-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s ease forwards;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #007bff;
+        }
+        
+        .error-card {
+            background: #ffe9e9;
+            color: #d8000c;
+            border-left: 4px solid #d8000c;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-card p {
+            margin: 10px 0;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .result-card i {
+            color: #007bff;
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            margin-top: 3px;
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            color: #007bff;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 123, 255, 0.2);
+            border-left: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        #toTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #toTop:hover {
+            background: #0056b3;
+            transform: scale(1.1);
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #0056b3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .container { 
+                padding: 20px; 
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .field input { 
+                padding: 14px 45px; 
+            }
+            
+            #toTop {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="top">
+        <h1><i class="fas fa-search"></i> Mobile Number & Aadhaar Lookup</h1>
+        
+        <div class="info-box">
+            <p><i class="fas fa-info-circle"></i> This tool helps you lookup information using Mobile Number or Aadhaar</p>
+            <p><i class="fas fa-shield-alt"></i> Your data is secure and not stored on our servers</p>
+        </div>
+        
+        <div class="toggle-btn">
+            <button id="mobileBtn" class="active" onclick="toggleInput('mobile')">
+                <i class="fa-solid fa-phone"></i> Mobile Lookup
+            </button>
+            <button id="aadhaarBtn" onclick="toggleInput('aadhaar')">
+                <i class="fa-solid fa-id-card"></i> Aadhaar Lookup
+            </button>
+        </div>
+        
+        <div class="field" id="mobileField">
+            <i class="fa-solid fa-phone"></i>
+            <input type="tel" id="mobile" placeholder="Enter 10-digit Mobile Number" maxlength="10">
+        </div>
+        
+        <div class="field" id="aadhaarField" style="display:none">
+            <i class="fa-solid fa-id-card"></i>
+            <input type="tel" id="aadhaar" placeholder="Enter 12-digit Aadhaar Number" maxlength="12">
+        </div>
+        
+        <button class="search-btn" onclick="search()">
+            <i class="fas fa-search"></i> Search Details
+        </button>
+        
+        <div id="output"></div>
+    </div>
+    
+    <div class="footer">
+        <p>SDK &copy; 2025</p>
+    </div>
+
+    <button id="toTop" onclick="scrollToTop()">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <script>
+        let currentInput = 'mobile';
+        
+        function toggleInput(type) {
+            currentInput = type;
+            if(type === 'mobile') {
+                document.getElementById('mobileField').style.display = 'block';
+                document.getElementById('aadhaarField').style.display = 'none';
+                document.getElementById('mobileBtn').classList.add('active');
+                document.getElementById('aadhaarBtn').classList.remove('active');
+                document.getElementById('mobile').value = '';
+            } else {
+                document.getElementById('mobileField').style.display = 'none';
+                document.getElementById('aadhaarField').style.display = 'block';
+                document.getElementById('mobileBtn').classList.remove('active');
+                document.getElementById('aadhaarBtn').classList.add('active');
+                document.getElementById('aadhaar').value = '';
+            }
+            
+            // Clear previous results
+            document.getElementById('output').innerHTML = '';
+        }
+
+        window.onscroll = function() {
+            document.getElementById('toTop').style.display = 
+                (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) ? 'flex' : 'none';
+        };
+
+        function scrollToTop() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // CORS Proxy function to bypass CORS restrictions
+        async function fetchWithCorsProxy(url) {
+            // Using a CORS proxy service
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            try {
+                const response = await fetch(proxyUrl + encodeURIComponent(url));
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error with CORS proxy:', error);
+                throw error;
+            }
+        }
+
+        async function search() {
+            let mobile = document.getElementById('mobile').value.trim();
+            let aadhaar = document.getElementById('aadhaar').value.trim();
+            let output = document.getElementById('output');
+            
+            // Validation
+            if(currentInput === 'mobile' && (mobile.length !== 10 || !/^\d{10}$/.test(mobile))) {
+                output.innerHTML = '<div class="error-card">Please enter a valid 10-digit mobile number</div>';
+                return;
+            }
+            
+            if(currentInput === 'aadhaar' && (aadhaar.length !== 12 || !/^\d{12}$/.test(aadhaar))) {
+                output.innerHTML = '<div class="error-card">Please enter a valid 12-digit Aadhaar number</div>';
+                return;
+            }
+            
+            // Show loading
+            output.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Searching for details. Please wait...</p>
+                </div>
+            `;
+            
+            let url = '';
+            
+            if(currentInput === 'mobile') {
+                url = `https://n2d.vercel.app/api?key=freeApi&number=${mobile}`;
+            } else {
+                url = `http://dark-op.dev-is.xyz/?key=wasdark&aadhaar=${aadhaar}`;
+            }
+            
+            try {
+                let data = await fetchWithCorsProxy(url);
+                
+                if(currentInput === 'mobile') {
+                    // Handle mobile API response
+                    if(data.status === "success") {
+                        let html = '';
+                        data.data.forEach(item => {
+                            html += `
+                                <div class="result-card">
+                                    <p><i class="fa-solid fa-user"></i><strong>Name:</strong> ${item.name || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-user-pen"></i><strong>Father's Name:</strong> ${item.father_name || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-phone"></i><strong>Mobile:</strong> ${item.mobile || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-phone-volume"></i><strong>Alt Mobile:</strong> ${item.alt_mobile || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-signal"></i><strong>Circle:</strong> ${item.circle || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-id-card"></i><strong>Aadhaar:</strong> ${item.aadhaar_number || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-location-dot"></i><strong>Address:</strong> ${item.address || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-envelope"></i><strong>Email:</strong> ${item.email || 'N/A'}</p>
+                                </div>
+                            `;
+                        });
+                        output.innerHTML = html;
+                    } else {
+                        output.innerHTML = `<div class="error-card">${data.data?.[0]?.error || 'No data found for this mobile number'}</div>`;
+                    }
+                } else {
+                    // Handle Aadhaar API response
+                    if(data.data && data.data.length > 0) {
+                        let html = '';
+                        data.data.forEach(item => {
+                            html += `
+                                <div class="result-card">
+                                    <p><i class="fa-solid fa-user"></i><strong>Name:</strong> ${item.name || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-user-pen"></i><strong>Father's Name:</strong> ${item.fname || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-phone"></i><strong>Mobile:</strong> ${item.mobile || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-phone-volume"></i><strong>Alt Mobile:</strong> ${item.alt || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-signal"></i><strong>Circle:</strong> ${item.circle || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-id-card"></i><strong>Aadhaar:</strong> ${item.id || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-location-dot"></i><strong>Address:</strong> ${item.address || 'N/A'}</p>
+                                    <p><i class="fa-solid fa-envelope"></i><strong>Email:</strong> ${item.email || 'N/A'}</p>
+                                </div>
+                            `;
+                        });
+                        output.innerHTML = html;
+                    } else {
+                        output.innerHTML = `<div class="error-card">No data found for this Aadhaar number</div>`;
+                    }
+                }
+            } catch(err) {
+                console.error('API Error:', err);
+                output.innerHTML = `
+                    <div class="error-card">
+                        <p><i class="fas fa-exclamation-triangle"></i> Unable to fetch data at the moment.</p>
+                        <p>This might be due to CORS restrictions or API unavailability.</p>
+                        <p>Please try again later or check your internet connection.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Allow Enter key to trigger search
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mobile').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    search();
+                }
+            });
+            
+            document.getElementById('aadhaar').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    search();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
