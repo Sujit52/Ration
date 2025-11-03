@@ -416,7 +416,7 @@
                 document.getElementById('totalRecords').textContent = 'Loading data...';
                 document.getElementById('searchStatus').textContent = 'Loading...';
                 
-                const response = await fetch('/data.csv');
+                const response = await fetch('/ration.csv');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
