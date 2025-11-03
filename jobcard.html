@@ -470,19 +470,7 @@
         }
 
         // Update category statistics
-        function updateCategoryStats() {
-            const categories = {};
-            csvData.forEach(item => {
-                const category = item.category || 'Unknown';
-                categories[category] = (categories[category] || 0) + 1;
-            });
-            
-            const statsText = Object.entries(categories)
-                .map(([cat, count]) => `${cat}: ${count}`)
-                .join(', ');
-                
-            document.getElementById('categoryStats').textContent = statsText;
-        }
+        
 
         // Parse CSV line
         function parseCSVLine(line) {
