@@ -13,7 +13,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -28,7 +28,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -292,7 +292,13 @@
             #searchInput {
                 min-width: 100%;
             }
-            
+
+            .footer {
+            margin-top: 10px;
+            text-align: center;
+            color: black;
+            font-size: 14px;
+            }
             .search-box {
                 flex-direction: column;
             }
@@ -321,14 +327,14 @@
     <div class="container">
         <div class="header">
             <h1>JOB Card Information</h1>
-            <p>Get JOB card details instantly </p>
+            <p>Get JOB card details instantly</p>
         </div>
 
         <div class="search-section">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search By Name, Jobcard Number Etc...">
                 <button id="searchBtn" onclick="searchData()">Search</button>
-            
+                
             </div>
 
             <div class="search-options">
@@ -353,14 +359,15 @@
                     <div id="searchStatus">Ready</div>
                 </div>
             </div>
+        
         </div>
 
         <div class="results-section">
-            <div class="results-info" id="resultsInfo">Enter search term to find job card details</div>
+            <div class="results-info" id="resultsInfo">Enter search term to find ration card details</div>
             
             <!-- Detailed Card View -->
             <div class="card-details" id="cardDetails">
-                <h3>🎫 Ration Card Details</h3>
+                <h3>🎫 Job Card Details</h3>
                 <div class="details-grid" id="detailsGrid">
                     <!-- Details will be populated here -->
                 </div>
@@ -369,10 +376,13 @@
             <!-- Results Table -->
             <div id="resultsContainer">
                 <div class="no-results">
-                    <h3>🔍 Search For Job Card Number</h3>
-                    <p>Use the search box above to find job card records</p>
+                    <h3>🔍 Search for job cards</h3>
+                    <p>Use the search box above to find ration card number</p>
                 </div>
             </div>
+        </div>
+        <div class="footer">
+        <p>SDK &copy; 2025</p>
         </div>
     </div>
 
@@ -679,7 +689,12 @@
             cardDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-       
+        // Export to CSV function
+        function exportToCSV() {
+            if (currentResults.length === 0) {
+                alert('No results to export!');
+                return;
+            }
 
             let csvContent = headers.join(',') + '\n';
             
@@ -712,13 +727,7 @@
             }
         });
 
-       
-                    
-                    // Hide card details
-                    document.getElementById('cardDetails').classList.remove('show');
-                }
-            }, 300);
-        });
+        
     </script>
 </body>
 </html>
