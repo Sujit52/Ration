@@ -690,36 +690,7 @@
         }
 
         // Export to CSV function
-        function exportToCSV() {
-            if (currentResults.length === 0) {
-                alert('No results to export!');
-                return;
-            }
-
-            let csvContent = headers.join(',') + '\n';
-            
-            currentResults.forEach(row => {
-                const rowData = headers.map(header => {
-                    let value = row[header] || '';
-                    if (value.includes(',')) {
-                        value = `"${value}"`;
-                    }
-                    return value;
-                });
-                csvContent += rowData.join(',') + '\n';
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'ration_card_search_results.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
+        
         // Search on Enter key
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
