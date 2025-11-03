@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Number Information</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        #mobileInput {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #mobileInput:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        #searchBtn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #searchBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        #searchBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .api-info {
+            background: #e8f4fd;
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .api-info code {
+            background: #2c3e50;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .results-section {
+            padding: 0 20px 30px 20px;
+        }
+
+        .results-info {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 1.1rem;
+            padding: 0 10px;
+        }
+
+        .person-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #3498db;
+        }
+
+        .person-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .person-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .person-mobile {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .address-parts {
+            margin-top: 5px;
+            padding-left: 10px;
+            border-left: 3px solid #3498db;
+        }
+
+        .address-part {
+            padding: 2px 0;
+            color: #666;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #3498db;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn {
+            padding: 10px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #219653;
+            transform: translateY(-2px);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .search-section {
+                padding: 20px;
+            }
+            
+            #mobileInput {
+                min-width: 100%;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .results-section {
+                padding: 0 10px 20px 10px;
+            }
+            
+            .stat-card {
+                min-width: 100%;
+            }
+            
+            .person-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .person-card {
+                padding: 20px 15px;
+            }
+            
+            .person-name {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Deep Mobile Number Information</h1>
+            <p>Fetch all linked numbers</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="tel" id="mobileInput" placeholder="Enter 10-digit mobile number" maxlength="10" pattern="[0-9]{10}">
+                <button id="searchBtn" onclick="searchMobile()">Search Number</button>
+            </div>
+
+           
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>🔍 Search Status</h3>
+                    <div id="searchStatus">Ready</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📊 Results Found</h3>
+                    <div id="resultsCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>⚡ Response Time</h3>
+                    <div id="responseTime">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-info" id="resultsInfo">SDK</div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Searching database...</p>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <div id="resultsContainer">
+                <div class="no-results">
+                    <h3>🔍 Search Mobile Number</h3>
+                    <p>Enter a 10-digit mobile number above to get detailed information</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://mynkapi.amit1100941.workers.dev/';
+        const API_KEY = 'onlymynk';
+
+        // Search mobile number
+        async function searchMobile() {
+            const mobileInput = document.getElementById('mobileInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('errorMessage');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+            const searchStatus = document.getElementById('searchStatus');
+            const resultsCount = document.getElementById('resultsCount');
+            const responseTime = document.getElementById('responseTime');
+
+            const mobileNumber = mobileInput.value.trim();
+
+            // Validation
+            if (!mobileNumber || mobileNumber.length !== 10 || !/^\d+$/.test(mobileNumber)) {
+                showError('Please enter a valid 10-digit mobile number');
+                return;
+            }
+
+            // Reset UI
+            errorDiv.style.display = 'none';
+            resultsContainer.innerHTML = '';
+            searchBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+            searchStatus.textContent = 'Searching...';
+
+            const startTime = performance.now();
+
+            try {
+                const apiUrl = `${API_BASE_URL}?mobile=${mobileNumber}&key=${API_KEY}`;
+                console.log('API URL:', apiUrl);
+
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const endTime = performance.now();
+                const searchTime = (endTime - startTime).toFixed(2);
+
+                responseTime.textContent = `${searchTime}ms`;
+                loadingDiv.style.display = 'none';
+                searchBtn.disabled = false;
+                searchStatus.textContent = 'Ready';
+
+                if (data && data.data && data.data.length > 0) {
+                    displayResults(data.data, mobileNumber);
+                    resultsCount.textContent = data.data.length;
+                } else {
+                    showNoResults(mobileNumber);
+                    resultsCount.textContent = '0';
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+                loadingDiv.style.display = 'none';
+                searchBtn.disabled = false;
+                searchStatus.textContent = 'Error';
+                showError(`Failed to fetch data: ${error.message}`);
+                resultsCount.textContent = '0';
+            }
+        }
+
+        // Display results
+        function displayResults(results, searchedNumber) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+
+            // Remove duplicates based on mobile + name + address combination
+            const uniqueResults = removeDuplicates(results);
+            
+            resultsInfo.innerHTML = `Found <strong>${uniqueResults.length} unique records</strong> for mobile number: <strong>${searchedNumber}</strong>`;
+
+            let html = '';
+
+            uniqueResults.forEach((person, index) => {
+                // Parse address (split by ! delimiter)
+                const addressParts = person.address ? person.address.split('!').filter(part => part.trim()) : [];
+                
+                html += `
+                    <div class="person-card fade-in">
+                        <div class="person-header">
+                            <div class="person-name">${person.name || 'N/A'}</div>
+                            <div class="person-mobile">${person.mobile || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Father's Name</div>
+                                <div class="detail-value">${person.fname || 'N/A'}</div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Network Circle</div>
+                                <div class="detail-value">${person.circle || 'N/A'}</div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Aadhaar ID</div>
+                                <div class="detail-value">${person.id || 'N/A'}</div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Alternate Number</div>
+                                <div class="detail-value">${person.alt || 'N/A'}</div>
+                            </div>
+                            
+                            <div class="detail-item" style="grid-column: 1 / -1;">
+                                <div class="detail-label">Full Address</div>
+                                <div class="detail-value">
+                                    ${addressParts.length > 0 ? addressParts[0] : 'N/A'}
+                                    ${addressParts.length > 1 ? `
+                                        <div class="address-parts">
+                                            ${addressParts.slice(1).map(part => 
+                                                `<div class="address-part">${part}</div>`
+                                            ).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="copy-btn" onclick="copyPersonInfo(${index})">
+                            📋 Copy Information
+                        </button>
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = html;
+        }
+
+        // Remove duplicate entries
+        function removeDuplicates(results) {
+            const seen = new Set();
+            return results.filter(person => {
+                const key = `${person.mobile}-${person.name}-${person.address}`;
+                if (seen.has(key)) {
+                    return false;
+                }
+                seen.add(key);
+                return true;
+            });
+        }
+
+        // Show no results message
+        function showNoResults(mobileNumber) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+            
+            resultsInfo.innerHTML = `No information found for mobile number: <strong>${mobileNumber}</strong>`;
+            
+            resultsContainer.innerHTML = `
+                <div class="no-results">
+                    <h3>❌ No Records Found</h3>
+                    <p>The mobile number <strong>${mobileNumber}</strong> is not found in our database.</p>
+                    <p>Please check the number and try again.</p>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Copy person information
+        function copyPersonInfo(index) {
+            const personCards = document.querySelectorAll('.person-card');
+            const card = personCards[index];
+            
+            const name = card.querySelector('.person-name').textContent;
+            const mobile = card.querySelector('.person-mobile').textContent;
+            const fname = card.querySelector('.detail-item:nth-child(1) .detail-value').textContent;
+            const circle = card.querySelector('.detail-item:nth-child(2) .detail-value').textContent;
+            const aadhaar = card.querySelector('.detail-item:nth-child(3) .detail-value').textContent;
+            const alt = card.querySelector('.detail-item:nth-child(4) .detail-value').textContent;
+            const address = card.querySelector('.detail-item:nth-child(5) .detail-value').textContent;
+            
+            const info = `
+Mobile Number: ${mobile}
+Name: ${name}
+Father's Name: ${fname}
+Network: ${circle}
+Aadhaar: ${aadhaar}
+Alternate Number: ${alt}
+Address: ${address}
+            `.trim();
+            
+            navigator.clipboard.writeText(info).then(() => {
+                const btn = card.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#27ae60';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // Auto-format mobile input
+        document.getElementById('mobileInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+
+        // Search on Enter key
+        document.getElementById('mobileInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMobile();
+            }
+        });
+
+        // Clear results when input is cleared
+        document.getElementById('mobileInput').addEventListener('input', function(e) {
+            if (this.value.length === 0) {
+                document.getElementById('resultsContainer').innerHTML = `
+                    <div class="no-results">
+                        <h3>🔍 Search Mobile Number</h3>
+                        <p>Enter a 10-digit mobile number above to get detailed information</p>
+                    </div>
+                `;
+                document.getElementById('resultsInfo').textContent = 'Enter a 10-digit mobile number to search';
+                document.getElementById('resultsCount').textContent = '0';
+                document.getElementById('responseTime').textContent = '-';
+                document.getElementById('errorMessage').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
