@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOB Card Information</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        #searchInput {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        #searchBtn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #searchBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .search-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .search-option {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .search-option.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .results-section {
+            padding: 0 20px 30px 20px;
+        }
+
+        .results-info {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 1.1rem;
+            padding: 0 10px;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            background: white;
+            margin-bottom: 20px;
+        }
+
+        .results-table {
+            width: 100%;
+            min-width: 1000px;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .results-table th {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+        }
+
+        .results-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .card-details {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .card-details.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .export-btn {
+            padding: 12px 25px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .export-btn:hover {
+            background: #219653;
+            transform: translateY(-2px);
+        }
+
+        mark {
+            background: yellow;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .search-section {
+                padding: 20px;
+            }
+            
+            #searchInput {
+                min-width: 100%;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .results-section {
+                padding: 0 10px 20px 10px;
+            }
+            
+            .stat-card {
+                min-width: 100%;
+            }
+            
+            .results-table th,
+            .results-table td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>JOB Card Information</h1>
+            <p>Get JOB card details instantly </p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search By Name, Jobcard Number Etc...">
+                <button id="searchBtn" onclick="searchData()">Search</button>
+            
+            </div>
+
+            <div class="search-options">
+                <div class="search-option active" onclick="setSearchType('all')">All Fields</div>
+                <div class="search-option" onclick="setSearchType('card')">Job Card Number</div>
+                <div class="search-option" onclick="setSearchType('name')">Name</div>
+                <div class="search-option" onclick="setSearchType('aadhaar')">Aadhaar</div>
+                <div class="search-option" onclick="setSearchType('mobile')">Mobile</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>📊 Total Records</h3>
+                    <div id="totalRecords">Loading...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>👥 Categories</h3>
+                    <div id="categoryStats">Loading...</div>
+                </div>
+                <div class="stat-card">
+                    <h3>⚡ Search Status</h3>
+                    <div id="searchStatus">Ready</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-info" id="resultsInfo">Enter search term to find job card details</div>
+            
+            <!-- Detailed Card View -->
+            <div class="card-details" id="cardDetails">
+                <h3>🎫 Ration Card Details</h3>
+                <div class="details-grid" id="detailsGrid">
+                    <!-- Details will be populated here -->
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div id="resultsContainer">
+                <div class="no-results">
+                    <h3>🔍 Search For Job Card Number</h3>
+                    <p>Use the search box above to find job card records</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let csvData = [];
+        let headers = [];
+        let currentResults = [];
+        let currentSearchType = 'all';
+
+        // Load CSV data when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCSVData();
+        });
+
+        // Set search type
+        function setSearchType(type) {
+            currentSearchType = type;
+            
+            // Update active button
+            document.querySelectorAll('.search-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update placeholder
+            const placeholders = {
+                'all': 'Search by ration card number, name, Aadhaar, mobile...',
+                'card': 'Search by ration card number...',
+                'name': 'Search by beneficiary name...',
+                'aadhaar': 'Search by Aadhaar number...',
+                'mobile': 'Search by mobile number...'
+            };
+            document.getElementById('searchInput').placeholder = placeholders[type];
+        }
+
+        // Load CSV from file
+        async function loadCSVData() {
+            try {
+                document.getElementById('totalRecords').textContent = 'Loading data...';
+                document.getElementById('searchStatus').textContent = 'Loading...';
+                
+                const response = await fetch('/jobcard.csv');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                const lines = csvText.split('\n').filter(line => line.trim());
+                
+                if (lines.length === 0) {
+                    throw new Error('CSV file is empty');
+                }
+                
+                // Parse CSV data
+                headers = lines[0].split(',').map(h => h.trim());
+                csvData = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    
+                    const values = parseCSVLine(lines[i]);
+                    let obj = {};
+                    
+                    headers.forEach((header, idx) => {
+                        obj[header] = values[idx] || '';
+                    });
+                    
+                    if (obj[headers[0]] && obj[headers[0]].trim() !== '') {
+                        csvData.push(obj);
+                    }
+                }
+                
+                // Update stats
+                document.getElementById('totalRecords').textContent = `${csvData.length} records loaded`;
+                updateCategoryStats();
+                document.getElementById('searchStatus').textContent = 'Ready';
+                
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                document.getElementById('totalRecords').textContent = 'Error loading data';
+                document.getElementById('searchStatus').textContent = 'Error';
+                loadSampleData();
+            }
+        }
+
+        // Update category statistics
+        function updateCategoryStats() {
+            const categories = {};
+            csvData.forEach(item => {
+                const category = item.category || 'Unknown';
+                categories[category] = (categories[category] || 0) + 1;
+            });
+            
+            const statsText = Object.entries(categories)
+                .map(([cat, count]) => `${cat}: ${count}`)
+                .join(', ');
+                
+            document.getElementById('categoryStats').textContent = statsText;
+        }
+
+        // Parse CSV line
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current.trim());
+            
+            return values;
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            headers = ['ration_card_no', 'category', 'name', 'gender', 'age', 'father_or_husband_name', 'hof_name', 'aadhaar', 'nominee_assigned', 'package_flag', 'mobile_no'];
+            csvData = [
+                {
+                    ration_card_no: '0022441623',
+                    category: 'PHH',
+                    name: 'GOPAL CHANDRA MURMU',
+                    gender: 'MALE',
+                    age: '53',
+                    father_or_husband_name: 'SAMAY MURMU',
+                    hof_name: 'MALATI MURMU',
+                    aadhaar: 'XXXX-XXXX-0041',
+                    nominee_assigned: '',
+                    package_flag: 'Jungle Mahal Package',
+                    mobile_no: 'N/A'
+                },
+                {
+                    ration_card_no: '0022441625',
+                    category: 'PHH',
+                    name: 'KALPANA MURMU',
+                    gender: 'FEMALE',
+                    age: '18',
+                    father_or_husband_name: 'GOPAL CHANDRA MURMU',
+                    hof_name: 'MALATI MURMU',
+                    aadhaar: 'XXXX-XXXX-2991',
+                    nominee_assigned: '',
+                    package_flag: 'Jungle Mahal Package',
+                    mobile_no: 'N/A'
+                }
+            ];
+            
+            document.getElementById('totalRecords').textContent = `${csvData.length} sample records loaded`;
+            document.getElementById('searchStatus').textContent = 'Ready (Sample Data)';
+            updateCategoryStats();
+        }
+
+        // Search function with type filtering
+        function searchData() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+            const searchStatus = document.getElementById('searchStatus');
+            const cardDetails = document.getElementById('cardDetails');
+
+            // Hide card details
+            cardDetails.classList.remove('show');
+
+            if (!query) {
+                resultsInfo.innerHTML = 'Please enter a search term';
+                resultsContainer.innerHTML = '<div class="no-results"><h3>🔍 Enter search term</h3><p>Please type something to search</p></div>';
+                return;
+            }
+
+            if (csvData.length === 0) {
+                resultsInfo.innerHTML = 'Data not loaded yet. Please wait...';
+                return;
+            }
+
+            searchStatus.textContent = 'Searching...';
+            const startTime = performance.now();
+            
+            // Filter based on search type
+            currentResults = csvData.filter(item => {
+                if (currentSearchType === 'all') {
+                    // Search all fields
+                    return Object.values(item).some(value => 
+                        value.toString().toLowerCase().includes(query)
+                    );
+                } else {
+                    // Search specific field
+                    const fieldMap = {
+                        'card': 'ration_card_no',
+                        'name': 'name',
+                        'aadhaar': 'aadhaar',
+                        'mobile': 'mobile_no'
+                    };
+                    const field = fieldMap[currentSearchType];
+                    return item[field] && item[field].toString().toLowerCase().includes(query);
+                }
+            });
+
+            const endTime = performance.now();
+            const searchTime = (endTime - startTime).toFixed(2);
+
+            searchStatus.textContent = 'Ready';
+            displayResults(currentResults, query, searchTime);
+        }
+
+        // Display results
+        function displayResults(results, query, searchTime) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsInfo = document.getElementById('resultsInfo');
+
+            if (results.length === 0) {
+                resultsInfo.innerHTML = `No results found for "<strong>${query}</strong>"`;
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>🔍 No matching records found</h3>
+                        <p>Try different search terms or check spelling</p>
+                    </div>
+                `;
+                return;
+            }
+
+            resultsInfo.innerHTML = `
+                Found <strong>${results.length}</strong> results for "<strong>${query}</strong>" 
+                in <strong>${searchTime}ms</strong>
+            `;
+
+            let html = `
+                <div class="table-container">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                ${headers.map(header => 
+                                    `<th>${header.replace(/_/g, ' ').toUpperCase()}</th>`
+                                ).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            results.forEach((row, index) => {
+                html += `<tr onclick="showCardDetails(${index})" style="cursor: pointer;">`;
+                
+                headers.forEach(header => {
+                    let value = row[header] || '';
+                    if (value.toLowerCase().includes(query)) {
+                        const regex = new RegExp(`(${query})`, 'gi');
+                        value = value.replace(regex, '<mark>$1</mark>');
+                    }
+                    html += `<td title="${value}">${value}</td>`;
+                });
+                
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            resultsContainer.innerHTML = html;
+        }
+
+        // Show detailed card view
+        function showCardDetails(index) {
+            const card = currentResults[index];
+            const cardDetails = document.getElementById('cardDetails');
+            const detailsGrid = document.getElementById('detailsGrid');
+
+            let detailsHtml = '';
+            
+            const detailFields = [
+                { label: 'Ration Card Number', value: card.ration_card_no },
+                { label: 'Category', value: card.category },
+                { label: 'Name', value: card.name },
+                { label: 'Gender', value: card.gender },
+                { label: 'Age', value: card.age },
+                { label: 'Father/Husband Name', value: card.father_or_husband_name },
+                { label: 'HOF Name', value: card.hof_name },
+                { label: 'Aadhaar Number', value: card.aadhaar },
+                { label: 'Nominee Assigned', value: card.nominee_assigned || 'No' },
+                { label: 'Package Flag', value: card.package_flag },
+                { label: 'Mobile Number', value: card.mobile_no }
+            ];
+
+            detailFields.forEach(field => {
+                if (field.value) {
+                    detailsHtml += `
+                        <div class="detail-item">
+                            <div class="detail-label">${field.label}</div>
+                            <div class="detail-value">${field.value}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            detailsGrid.innerHTML = detailsHtml;
+            cardDetails.classList.add('show');
+            
+            // Scroll to details
+            cardDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+       
+
+            let csvContent = headers.join(',') + '\n';
+            
+            currentResults.forEach(row => {
+                const rowData = headers.map(header => {
+                    let value = row[header] || '';
+                    if (value.includes(',')) {
+                        value = `"${value}"`;
+                    }
+                    return value;
+                });
+                csvContent += rowData.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'ration_card_search_results.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchData();
+            }
+        });
+
+       
+                    
+                    // Hide card details
+                    document.getElementById('cardDetails').classList.remove('show');
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>
